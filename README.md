@@ -2,8 +2,8 @@
 
 Android TV 上的 Folia 客户端：内置 Folia 界面 + WebView 壳，适配遥控器（D-pad）。只需配置音源 API。
 
-**APK 下载：** [Releases · v0.1.0](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.0)  
-直链：[`Folia-TV-0.1.0.apk`](https://github.com/X-GeekMan/Folia-TV/releases/download/v0.1.0/Folia-TV-0.1.0.apk)
+**APK 下载：** [Releases · v0.1.1](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.1)  
+直链：[`Folia-TV-0.1.1.apk`](https://github.com/X-GeekMan/Folia-TV/releases/download/v0.1.1/Folia-TV-0.1.1.apk)
 
 ## 项目简介
 
@@ -29,7 +29,7 @@ scripts/             构建 / 推送脚本
 ## 安装
 
 ```bash
-adb install -r Folia-TV-0.1.0.apk
+adb install -r Folia-TV-0.1.1.apk
 ```
 
 首次启动填写 API：
