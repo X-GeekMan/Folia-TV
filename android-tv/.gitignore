@@ -1,0 +1,9 @@
+# Folia TV Android shell
+android-tv/.gradle/
+android-tv/build/
+android-tv/app/build/
+android-tv/local.properties
+android-tv/*.iml
+android-tv/.idea/
+*.apk
+*.aab
