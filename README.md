@@ -30,6 +30,9 @@ Lyrics Reimagined // 辞曲新境 — Android TV Edition
 
 </div>
 
+> [!TIP]
+> **Android TV APK 下载**：[Releases · Folia-TV v0.1.0](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.0)（附件 `Folia-TV-0.1.0.apk`）
+
 > [!IMPORTANT]
 > **本仓库是 [chthollyphile/folia-major](https://github.com/chthollyphile/folia-major) 的 Android TV 适配分支（Folia-TV）。**
 > 功能与上游一致；新增 `android-tv/` WebView 壳与遥控器（D-pad）适配。TV 端只做客户端，音源 API 仍按上游方式自托管。
