@@ -21,6 +21,18 @@ android {
         )
     }
 
+    signingConfigs {
+        create("release") {
+            val ksFile = rootProject.file("keystore/folia-tv-release.jks")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = System.getenv("FOLIA_TV_STORE_PASSWORD") ?: "foliatv2026"
+                keyAlias = System.getenv("FOLIA_TV_KEY_ALIAS") ?: "foliatv"
+                keyPassword = System.getenv("FOLIA_TV_KEY_PASSWORD") ?: "foliatv2026"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -28,6 +40,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            val releaseSigning = signingConfigs.findByName("release")
+            if (releaseSigning?.storeFile?.exists() == true) {
+                signingConfig = releaseSigning
+            }
         }
         debug {
             applicationIdSuffix = ".debug"
