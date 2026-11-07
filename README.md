@@ -1,9 +1,11 @@
 # Folia-TV
 
-Android TV 上的 Folia 客户端：内置 Folia 界面 + WebView 壳，适配遥控器（D-pad）。只需配置音源 API。
+Android TV 上的 Folia 客户端：内置 Folia 界面 + WebView 壳，适配遥控器（D-pad）。
+
+音源层采用 [Timingyyds/folia-android](https://github.com/Timingyyds/folia-android) 的后端思路——**设备内 `audioNative` 协议 + 原生 OkHttp/Cookie 桥**，默认无需电脑开 Node；Folia 前端业务代码保持不动。
 
 **APK 下载：** [Releases · v0.1.2](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.2)  
-直链：[`Folia-TV-0.1.2.apk`](https://github.com/X-GeekMan/Folia-TV/releases/download/v0.1.2/Folia-TV-0.1.2.apk)
+直链：[`Folia-TV-0.1.2.apk`](https://github.com/X-GeekMan/Folia-TV/releases/download/v0.1.2/Folia-TV-0.1.2.apk)（内置桥请装本地打出的 `0.1.3+`）
 
 ## 系统要求（最低）
 
@@ -12,7 +14,7 @@ Android TV 上的 Folia 客户端：内置 Folia 界面 + WebView 壳，适配�
 | Android | **9.0（API 28）** | `minSdk = 28`；TV / 机顶盒 / 雷电等模拟器均适用 |
 | Android System WebView / Chrome | **Chromium 主版本 ≥ 100** | 内置 Folia 为现代 Vite/React 产物；过旧 WebView 可能白屏或功能异常 |
 | 架构 | armeabi-v7a / arm64-v8a 等设备自带 WebView 即可 | 普通 APK，无独立 Chromium 内核 |
-| 音源 API | 需自建网易云（必需）等后端 | 与电脑版 Folia 共用；TV 不内嵌 Node API |
+| 音源 | 默认内置网易云 / 酷狗（folia-android 思路） | 设置中也可选填远程 API 覆盖；QQ 暂建议远程 |
 
 建议在可更新 WebView 的环境使用（有 Google Play / 厂商应用商店）。部分国产机顶盒 WebView 无法升级时，即使 Android 版本够也可能无法运行完整界面。
 
@@ -22,13 +24,23 @@ Android TV 上的 Folia 客户端：内置 Folia 界面 + WebView 壳，适配�
 
 Folia-TV 是面向 Android TV / 机顶盒的播放端：
 
-- **内置前端**（与 Folia Web 同源），不再填写部署 URL
-- 首次启动只配置网易云 / QQ / 酷狗等 **API 地址**
-- 使用 **WebView 壳**打包 APK（不是 TWA）
+- **内置前端**（与 [folia-major](https://github.com/chthollyphile/folia-major) Web 同源），业务 UI 不改
+- **音源后端思想对齐 [folia-android](https://github.com/Timingyyds/folia-android)**：注入 `audioNative`，经 `FoliaNative.bridgeRequest`（OkHttp + CookieManager）完成协议请求
+- 设置页可留空走内置，或填写远程 API 覆盖某一音源
 - **遥控器**：方向键焦点、确认、返回、播放/上下曲
-- TV 只做客户端；音源 API 仍需在电脑 / NAS 上自建（与电脑版共用）
 
 包名：`top.izuna.foliatv`
+
+## 音源架构（folia-android）
+
+| 层级 | 作用 |
+| --- | --- |
+| Folia UI | 仍请求构建期哨兵基址（`VITE_*`），**不改前端业务** |
+| `folia-audio-native.js` | 自 folia-android `audioNative` 移植，拦截哨兵请求并实现网易云/酷狗协议 |
+| `FoliaNative.bridgeRequest` | 原生 OkHttp + WebView CookieManager（对齐 FoliaBridge） |
+| 设置页远程 API | 可选覆盖；填写后该音源走外置服务 |
+
+当前内置优先：**网易云、酷狗**；QQ 可暂用远程 API。
 
 ## 目录
 
@@ -42,10 +54,10 @@ scripts/             构建 / 推送脚本
 ## 安装
 
 ```bash
-adb install -r Folia-TV-0.1.2.apk
+adb install -r Folia-TV-0.1.3.apk
 ```
 
-首次启动填写 API：
+首次启动点「使用内置音源」即可；若要用电脑上的 Node API，再填远程地址：
 
 | 场景 | 网易云 API 示例 |
 | --- | --- |
@@ -62,10 +74,13 @@ git clone --depth 1 https://github.com/chthollyphile/folia-major.git web
 # 2) 用哨兵 API 地址打包前端 → android-tv/.../assets/www
 node scripts/build-web-for-tv.mjs
 
-# 3)（可选）从 web/build/icon.png 重新生成桌面图标 / TV Banner
+# 3) 构建内置音源桥（folia-android audioNative）
+cd tv-audio-native && npm install && npm run build && cd ..
+
+# 4)（可选）从 web/build/icon.png 重新生成桌面图标 / TV Banner
 powershell -File scripts/generate-android-icons.ps1
 
-# 4) 打 APK
+# 5) 打 APK
 cd android-tv
 ./gradlew :app:assembleRelease
 ```
