@@ -5,15 +5,14 @@
 <div align="center">
 <a href="https://trendshift.io/repositories/71740?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-71740" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/71740" alt="chthollyphile%2Ffolia-major | Trendshift" width="250" height="55"/></a>
 
-# Folia
-
-Lyrics Reimagined // 辞曲新境
+# Folia-TV
+Lyrics Reimagined // 辞曲新境 — Android TV Edition
 
 简体中文 | [English](README.en.md)
 
-[![GitHub release](https://img.shields.io/github/v/release/chthollyphile/folia-major?label=release)](https://github.com/chthollyphile/folia-major/releases)
-[![License](https://img.shields.io/github/license/chthollyphile/folia-major)](https://github.com/chthollyphile/folia-major/blob/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/chthollyphile/folia-major?style=social)](https://github.com/chthollyphile/folia-major/stargazers)
+[![GitHub release](https://img.shields.io/github/v/release/X-GeekMan/Folia-TV?label=release)](https://github.com/X-GeekMan/Folia-TV/releases)
+[![License](https://img.shields.io/github/license/X-GeekMan/Folia-TV)](https://github.com/X-GeekMan/Folia-TV/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/X-GeekMan/Folia-TV?style=social)](https://github.com/X-GeekMan/Folia-TV/stargazers)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D24-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/chthollyphile/folia-major)
 [![Discord](https://img.shields.io/discord/1541051241822687232?logo=discord&logoColor=white&label=Join%20our%20Discord)](https://discord.gg/dMDBTHxeKd)
@@ -31,7 +30,13 @@ Lyrics Reimagined // 辞曲新境
 
 </div>
 
+> [!IMPORTANT]
+> **本仓库是 [chthollyphile/folia-major](https://github.com/chthollyphile/folia-major) 的 Android TV 适配分支（Folia-TV）。**
+> 功能与上游一致；新增 `android-tv/` WebView 壳与遥控器（D-pad）适配。TV 端只做客户端，音源 API 仍按上游方式自托管。
+
 ## 项目简介
+
+**Folia-TV** 基于上游 Folia，在 Android TV 上以 WebView 壳运行同一套播放器，并适配遥控器操作。
 
 Folia是一个以全屏沉浸式歌词播放为核心的在线音乐播放器，支持网易云、酷狗、QQ 音乐、Navidrome 和本地音乐库，桌面端还支持波点音乐、YouTube Music、Spotify 和汽水音乐，通过智能歌词匹配，AI生成配色主题，以及多种全屏歌词动画为用户提供独特的听歌体验。
 
@@ -39,10 +44,38 @@ Folia是一个以全屏沉浸式歌词播放为核心的在线音乐播放器，
 
 如果希望能够在移动设备上使用，或在浏览器上体验，可以选择[一键部署到 Vercel](https://folia-site.cielaniska.top/guide/deploy-vercel) 的 Web 版本，或自行部署到其他支持 Node.js 的平台。
 
+
+## Folia-TV（Android TV）
+
+在保留 Folia 全部 Web 功能的前提下，增加 Android TV 打包与遥控器支持：
+
+| 模块 | 说明 |
+| --- | --- |
+| `android-tv/` | Leanback WebView APK：加载 Folia Web，注入按键桥 |
+| `tv-overlay/` | Web 侧 TV 适配入口（焦点样式等） |
+| `docs/FOLIA-TV.md` | TV 端构建、安装与遥控器映射说明 |
+
+### 快速构建 TV APK
+
+```bash
+cd android-tv
+./gradlew :app:assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+首次启动填写已部署的 Folia Web 地址；模拟器可用：
+
+```bash
+adb shell am start -n top.izuna.foliatv.debug/.MainActivity --es start_url "http://10.0.2.2:3000"
+```
+
+遥控器：方向键移动焦点，确认激活，返回关闭弹层/退出，播放键映射到播放控制。
+
+
 ## 快速下载
 
 > [!TIP]
-> - **GitHub**：[Latest Release](https://github.com/chthollyphile/folia-major/releases/latest)，提供 Windows / macOS / Linux 全平台安装包。
+> - **GitHub**：[Latest Release](https://github.com/X-GeekMan/Folia-TV/releases/latest)，提供 Windows / macOS / Linux 全平台安装包。
 > - **网盘**：[夸克网盘](https://pan.quark.cn/s/6e4c6fa3bc6f) · [百度云](https://pan.baidu.com/s/1f0x3g-8PMcNCO-TJ5z1rPw?pwd=flia)（提取码 `flia`），适合国内网络，仅提供 Windows 与 Apple silicon 的正式版安装包。
 >
 > 更多获取方式（Web 部署、Docker、AUR、Flatpak、移动端）见下方 [获取方式](#获取方式)。
@@ -147,7 +180,7 @@ Vercel 与 Cloudflare 上的 QQ 音乐不再需要额外部署一个常驻 API �
 
 ### 直接下载
 
-- **Windows / macOS / Linux**: 最新版本的安装包请前往 [Releases 页面](https://github.com/chthollyphile/folia-major/releases/latest) 下载。
+- **Windows / macOS / Linux**: 最新版本的安装包请前往 [Releases 页面](https://github.com/X-GeekMan/Folia-TV/releases/latest) 下载。
 - **Arch Linux**: 可通过 AUR 获取 [folia-major-bin](https://aur.archlinux.org/packages/folia-major-bin)。
 - **Flatpak**: 社区提供的第三方 flatpak，详情见 [Flatpark](https://flatpark.org/apps/top.izuna.foliamajor/)。
 - **Android**: 社区第三方移植版见下方 [移动端](#移动端)。
