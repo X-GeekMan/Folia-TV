@@ -9,10 +9,11 @@ android {
 
     defaultConfig {
         applicationId = "top.izuna.foliatv"
-        minSdk = 24
+        // Folia Web needs a modern Chromium WebView; Android 9+ is the practical floor for TV boxes.
+        minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 3
+        versionName = "0.1.2"
         // First-run API settings. Bundled Folia UI loads from assets/www after config.
         buildConfigField(
             "String",
@@ -70,7 +71,8 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.webkit:webkit:1.12.1")
+    // androidx.webkit 1.16+ requires minSdk 24; we already require 28 for WebView quality.
+    implementation("androidx.webkit:webkit:1.14.0")
     implementation("androidx.media:media:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
 }

@@ -2,8 +2,21 @@
 
 Android TV 上的 Folia 客户端：内置 Folia 界面 + WebView 壳，适配遥控器（D-pad）。只需配置音源 API。
 
-**APK 下载：** [Releases · v0.1.1](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.1)  
-直链：[`Folia-TV-0.1.1.apk`](https://github.com/X-GeekMan/Folia-TV/releases/download/v0.1.1/Folia-TV-0.1.1.apk)
+**APK 下载：** [Releases · v0.1.2](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.2)  
+直链：[`Folia-TV-0.1.2.apk`](https://github.com/X-GeekMan/Folia-TV/releases/download/v0.1.2/Folia-TV-0.1.2.apk)
+
+## 系统要求（最低）
+
+| 项目 | 最低要求 | 说明 |
+| --- | --- | --- |
+| Android | **9.0（API 28）** | `minSdk = 28`；TV / 机顶盒 / 雷电等模拟器均适用 |
+| Android System WebView / Chrome | **Chromium 主版本 ≥ 100** | 内置 Folia 为现代 Vite/React 产物；过旧 WebView 可能白屏或功能异常 |
+| 架构 | armeabi-v7a / arm64-v8a 等设备自带 WebView 即可 | 普通 APK，无独立 Chromium 内核 |
+| 音源 API | 需自建网易云（必需）等后端 | 与电脑版 Folia 共用；TV 不内嵌 Node API |
+
+建议在可更新 WebView 的环境使用（有 Google Play / 厂商应用商店）。部分国产机顶盒 WebView 无法升级时，即使 Android 版本够也可能无法运行完整界面。
+
+应用图标与 TV Banner 使用上游 [folia-major](https://github.com/chthollyphile/folia-major) 的 `build/icon.png`。
 
 ## 项目简介
 
@@ -29,14 +42,15 @@ scripts/             构建 / 推送脚本
 ## 安装
 
 ```bash
-adb install -r Folia-TV-0.1.1.apk
+adb install -r Folia-TV-0.1.2.apk
 ```
 
 首次启动填写 API：
 
 | 场景 | 网易云 API 示例 |
 | --- | --- |
-| Android 模拟器访问宿主 | `http://10.0.2.2:3300` |
+| 雷电模拟器访问本机 | `http://10.0.3.2:3300` |
+| Android 官方模拟器 | `http://10.0.2.2:3300` |
 | 真机 + 电脑局域网 | `http://192.168.x.x:3300` |
 
 ## 本地构建
@@ -48,7 +62,10 @@ git clone --depth 1 https://github.com/chthollyphile/folia-major.git web
 # 2) 用哨兵 API 地址打包前端 → android-tv/.../assets/www
 node scripts/build-web-for-tv.mjs
 
-# 3) 打 APK
+# 3)（可选）从 web/build/icon.png 重新生成桌面图标 / TV Banner
+powershell -File scripts/generate-android-icons.ps1
+
+# 4) 打 APK
 cd android-tv
 ./gradlew :app:assembleRelease
 ```
@@ -74,8 +91,8 @@ cd android-tv
 ## 发布新版本
 
 ```bash
-git tag v0.1.1
-git push origin v0.1.1
+git tag v0.1.2
+git push origin v0.1.2
 ```
 
 GitHub Actions 会拉取 `folia-major`、打包内置前端并挂 APK 到对应 Release。

@@ -80,28 +80,29 @@
   <main>
     <section class="card">
       <h1>Folia TV</h1>
-      <p class="lead">内置播放界面。只需配置音源 API 地址（与电脑版共用你自建的后端）。模拟器访问电脑请用 <code>10.0.2.2</code>。</p>
+      <p class="lead">内置播放界面。只需配置音源 API 地址（与电脑版共用你自建的后端）。</p>
 
       <label for="netease">网易云 API（必需）</label>
       <input id="netease" data-tv-focusable="true" type="url" spellcheck="false"
-        placeholder="http://10.0.2.2:3300" />
+        placeholder="http://10.0.3.2:3300" />
 
       <label for="qq">QQ 音乐 API（可选）</label>
       <input id="qq" data-tv-focusable="true" type="url" spellcheck="false"
-        placeholder="http://10.0.2.2:3200" />
+        placeholder="http://10.0.3.2:3200" />
 
       <label for="kugou">酷狗 API（可选）</label>
       <input id="kugou" data-tv-focusable="true" type="url" spellcheck="false"
-        placeholder="http://10.0.2.2:3400" />
+        placeholder="http://10.0.3.2:3400" />
 
       <div class="row">
         <button id="save" data-tv-focusable="true">保存并进入</button>
-        <button id="emulator" class="secondary" data-tv-focusable="true">填入模拟器默认</button>
+        <button id="ldplayer" class="secondary" data-tv-focusable="true">雷电默认</button>
+        <button id="avd" class="secondary" data-tv-focusable="true">官方模拟器</button>
       </div>
       <div class="status" id="status"></div>
       <div class="hints">
-        电脑版开箱即用是因为 Electron 内嵌了 API；TV 版内置界面，API 仍在你的电脑/NAS 上。<br/>
-        开发示例：网易云 API 开在 <code>3300</code>，此处填 <code>http://10.0.2.2:3300</code>。
+        电脑上必须先跑着网易云 API，否则会出现「无法连接网易云」。<br/>
+        <code>10.0.3.2</code> = 雷电访问本机；<code>10.0.2.2</code> = Android 官方模拟器；真机请填电脑局域网 IP（如 <code>192.168.x.x</code>）。
       </div>
     </section>
   </main>
@@ -156,7 +157,13 @@
       }
 
       document.getElementById("save").addEventListener("click", saveAndEnter);
-      document.getElementById("emulator").addEventListener("click", function () {
+      document.getElementById("ldplayer").addEventListener("click", function () {
+        netease.value = "http://10.0.3.2:3300";
+        qq.value = "http://10.0.3.2:3200";
+        kugou.value = "";
+        netease.focus();
+      });
+      document.getElementById("avd").addEventListener("click", function () {
         netease.value = "http://10.0.2.2:3300";
         qq.value = "http://10.0.2.2:3200";
         kugou.value = "";
@@ -164,8 +171,8 @@
       });
       load();
       if (!netease.value) {
-        // Emulator-friendly default
-        netease.value = "http://10.0.2.2:3300";
+        // LDPlayer-friendly default (雷电)
+        netease.value = "http://10.0.3.2:3300";
       }
     })();
   </script>

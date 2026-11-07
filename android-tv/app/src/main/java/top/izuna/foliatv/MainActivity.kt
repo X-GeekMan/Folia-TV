@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        logWebViewRequirement()
         webView = createWebView()
         installDocumentStartScripts(webView)
         setContentView(
@@ -305,8 +306,28 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    private fun logWebViewRequirement() {
+        // Folia SPA expects a modern Chromium (ES modules / modern JS).
+        val pkg = WebView.getCurrentWebViewPackage()
+        if (pkg == null) {
+            Log.w(TAG, "No Android System WebView package found")
+            return
+        }
+        val versionName = pkg.versionName.orEmpty()
+        val major = versionName.substringBefore('.').toIntOrNull() ?: 0
+        Log.i(TAG, "WebView package=${pkg.packageName} version=$versionName")
+        if (major in 1 until MIN_WEBVIEW_MAJOR) {
+            Log.w(
+                TAG,
+                "WebView $versionName is below recommended $MIN_WEBVIEW_MAJOR+. Folia UI may fail; update Android System WebView / Chrome.",
+            )
+        }
+    }
+
     companion object {
         private const val TAG = "FoliaTV"
+        /** Recommended Chromium major for the bundled Folia UI. */
+        const val MIN_WEBVIEW_MAJOR = 100
         const val EXTRA_START_URL = "start_url"
         const val EXTRA_OPEN_SETTINGS = "open_settings"
         const val EXTRA_FORCE_SETTINGS = "force_settings"

@@ -39,6 +39,18 @@ function createBlobFromFile(fullPath) {
   }).sha;
 }
 
+function walkFiles(dir, prefix = "") {
+  const out = [];
+  for (const name of fs.readdirSync(dir)) {
+    const full = path.join(dir, name);
+    const rel = prefix ? `${prefix}/${name}` : name;
+    const st = fs.statSync(full);
+    if (st.isDirectory()) out.push(...walkFiles(full, rel));
+    else out.push(rel.replace(/\\/g, "/"));
+  }
+  return out;
+}
+
 const relPaths = [
   "README.md",
   ".gitignore",
@@ -59,36 +71,29 @@ const relPaths = [
   "android-tv/app/src/main/java/top/izuna/foliatv/FoliaJsBridge.kt",
   "android-tv/app/src/main/java/top/izuna/foliatv/MainActivity.kt",
   "android-tv/app/src/main/java/top/izuna/foliatv/TvKeyMapper.kt",
-  "android-tv/app/src/main/res/drawable/ic_launcher.xml",
-  "android-tv/app/src/main/res/drawable/tv_banner.xml",
   "android-tv/app/src/main/res/values/strings.xml",
   "android-tv/app/src/main/res/values/themes.xml",
   "android-tv/app/src/main/res/xml/network_security_config.xml",
+  "android-tv/branding/folia-icon.png",
   "android-tv/gradle/wrapper/gradle-wrapper.jar",
   "android-tv/gradle/wrapper/gradle-wrapper.properties",
   "scripts/apply-tv-overlay.ps1",
   "scripts/build-web-for-tv.mjs",
+  "scripts/generate-android-icons.ps1",
   "scripts/push-tv-to-fork.mjs",
   "tv-overlay/README.md",
   "tv-overlay/src/tv/initTvAdapter.ts",
 ];
 
-const ignoreContent = `# Folia TV Android shell
-android-tv/.gradle/
-android-tv/build/
-android-tv/app/build/
-android-tv/app/src/main/assets/www/
-android-tv/local.properties
-android-tv/*.iml
-android-tv/.idea/
-android-tv/keystore/
-android-tv/dist/
-*.apk
-*.aab
-web/
-vendor/
-folia-major.zip
-`;
+// Include generated mipmaps / banners
+const resRoot = path.join(root, "android-tv/app/src/main/res");
+for (const rel of walkFiles(resRoot)) {
+  if (/\.(png|xml)$/i.test(rel)) {
+    relPaths.push(`android-tv/app/src/main/res/${rel}`);
+  }
+}
+
+const unique = [...new Set(relPaths)];
 
 console.log("Resolving base...");
 const ref = ghJson([`repos/${owner}/${repo}/git/ref/heads/${branch}`]);
@@ -98,26 +103,17 @@ const baseTree = baseCommit.tree.sha;
 console.log(`base=${baseSha}`);
 
 const tree = [];
-for (const rel of relPaths) {
+for (const rel of unique) {
   const full = path.join(root, rel);
-  if (!fs.existsSync(full)) throw new Error(`Missing ${full}`);
+  if (!fs.existsSync(full)) {
+    console.warn(`skip missing ${rel}`);
+    continue;
+  }
   process.stdout.write(`blob ${rel}\n`);
   const sha = createBlobFromFile(full);
   const mode = rel === "android-tv/gradlew" ? "100755" : "100644";
   tree.push({ path: rel, mode, type: "blob", sha });
 }
-
-const ignoreSha = ghJson(["-X", "POST", `repos/${owner}/${repo}/git/blobs`], {
-  content: ignoreContent,
-  encoding: "utf-8",
-}).sha;
-tree.push({ path: "android-tv/.gitignore", mode: "100644", type: "blob", sha: ignoreSha });
-
-const rootIgnoreSha = ghJson(["-X", "POST", `repos/${owner}/${repo}/git/blobs`], {
-  content: fs.readFileSync(path.join(root, ".gitignore"), "utf8"),
-  encoding: "utf-8",
-}).sha;
-tree.push({ path: ".gitignore", mode: "100644", type: "blob", sha: rootIgnoreSha });
 
 console.log(`Creating tree (${tree.length})...`);
 const newTree = ghJson(["-X", "POST", `repos/${owner}/${repo}/git/trees`], {
@@ -128,9 +124,9 @@ console.log(`new_tree=${newTree.sha}`);
 
 const newCommit = ghJson(["-X", "POST", `repos/${owner}/${repo}/git/commits`], {
   message:
-    "feat(tv): bundle Folia UI and configure API hosts only\n\n" +
-    "Replace deploy-URL bootstrap with API settings. Inject runtime rewrite\n" +
-    "from sentinel VITE bases to user-configured netease/qq/kugou hosts.",
+    "feat(tv): Folia brand icons + raise Android/WebView minimums\n\n" +
+    "Use folia-major build/icon.png for launcher and TV banner.\n" +
+    "Require Android 9 (API 28) and document WebView Chromium >= 100.",
   tree: newTree.sha,
   parents: [baseSha],
 });
