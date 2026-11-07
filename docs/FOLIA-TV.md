@@ -2,7 +2,7 @@
 
 Android TV 上的 Folia 客户端：内置 Folia 界面，适配遥控器（D-pad）。
 
-**APK 下载：** [Releases · v0.1.0](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.0)
+**APK 下载：** [Releases · v0.1.1](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.1)
 
 ## 与电脑版的差异
 
