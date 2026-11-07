@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Folia TV 设置</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1a14;
+      --fg: #e8fff2;
+      --accent: #7cffb2;
+      --muted: #8fb5a2;
+      --panel: #13261e;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; min-height: 100%;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, #163528, var(--bg));
+      color: var(--fg);
+    }
+    main {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 40px;
+    }
+    .card {
+      width: min(960px, 100%);
+      background: color-mix(in srgb, var(--panel) 88%, black);
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+      border-radius: 20px;
+      padding: 36px 40px;
+    }
+    h1 { margin: 0 0 8px; font-size: 40px; font-weight: 650; }
+    .lead { margin: 0 0 28px; color: var(--muted); font-size: 18px; line-height: 1.5; }
+    label { display: block; font-size: 15px; color: var(--muted); margin: 16px 0 8px; }
+    input {
+      width: 100%;
+      font-size: 20px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      background: #0a1511;
+      color: var(--fg);
+      outline: none;
+    }
+    input:focus, button:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 6px rgba(124,255,178,0.2);
+    }
+    .row { display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap; }
+    button {
+      font-size: 18px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: 0;
+      background: var(--accent);
+      color: #062016;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--fg);
+      border: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    }
+    .hints {
+      margin-top: 24px;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .hints code { color: var(--accent); font-family: ui-monospace, Consolas, monospace; }
+    .status { margin-top: 12px; color: var(--accent); min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <h1>Folia TV</h1>
+      <p class="lead">内置播放界面。只需配置音源 API 地址（与电脑版共用你自建的后端）。模拟器访问电脑请用 <code>10.0.2.2</code>。</p>
+
+      <label for="netease">网易云 API（必需）</label>
+      <input id="netease" data-tv-focusable="true" type="url" spellcheck="false"
+        placeholder="http://10.0.2.2:3300" />
+
+      <label for="qq">QQ 音乐 API（可选）</label>
+      <input id="qq" data-tv-focusable="true" type="url" spellcheck="false"
+        placeholder="http://10.0.2.2:3200" />
+
+      <label for="kugou">酷狗 API（可选）</label>
+      <input id="kugou" data-tv-focusable="true" type="url" spellcheck="false"
+        placeholder="http://10.0.2.2:3400" />
+
+      <div class="row">
+        <button id="save" data-tv-focusable="true">保存并进入</button>
+        <button id="emulator" class="secondary" data-tv-focusable="true">填入模拟器默认</button>
+      </div>
+      <div class="status" id="status"></div>
+      <div class="hints">
+        电脑版开箱即用是因为 Electron 内嵌了 API；TV 版内置界面，API 仍在你的电脑/NAS 上。<br/>
+        开发示例：网易云 API 开在 <code>3300</code>，此处填 <code>http://10.0.2.2:3300</code>。
+      </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      var netease = document.getElementById("netease");
+      var qq = document.getElementById("qq");
+      var kugou = document.getElementById("kugou");
+      var status = document.getElementById("status");
+
+      function load() {
+        try {
+          if (window.FoliaNative && FoliaNative.getApiConfig) {
+            var raw = FoliaNative.getApiConfig();
+            var cfg = JSON.parse(raw || "{}");
+            netease.value = cfg.neteaseApiBase || "";
+            qq.value = cfg.qqApiBase || "";
+            kugou.value = cfg.kugouApiBase || "";
+            return;
+          }
+        } catch (e) {}
+        try {
+          var local = JSON.parse(localStorage.getItem("foliatv.apiConfig") || "{}");
+          netease.value = local.neteaseApiBase || "";
+          qq.value = local.qqApiBase || "";
+          kugou.value = local.kugouApiBase || "";
+        } catch (e) {}
+      }
+
+      function saveAndEnter() {
+        var cfg = {
+          neteaseApiBase: (netease.value || "").trim().replace(/\/$/, ""),
+          qqApiBase: (qq.value || "").trim().replace(/\/$/, ""),
+          kugouApiBase: (kugou.value || "").trim().replace(/\/$/, "")
+        };
+        if (!cfg.neteaseApiBase) {
+          status.textContent = "请填写网易云 API 地址";
+          netease.focus();
+          return;
+        }
+        try { localStorage.setItem("foliatv.apiConfig", JSON.stringify(cfg)); } catch (e) {}
+        try {
+          if (window.FoliaNative && FoliaNative.saveApiConfig) {
+            FoliaNative.saveApiConfig(JSON.stringify(cfg));
+            status.textContent = "已保存，正在进入…";
+            return;
+          }
+        } catch (e) {
+          status.textContent = String(e);
+        }
+        status.textContent = "已保存到本地（无原生桥）";
+      }
+
+      document.getElementById("save").addEventListener("click", saveAndEnter);
+      document.getElementById("emulator").addEventListener("click", function () {
+        netease.value = "http://10.0.2.2:3300";
+        qq.value = "http://10.0.2.2:3200";
+        kugou.value = "";
+        netease.focus();
+      });
+      load();
+      if (!netease.value) {
+        // Emulator-friendly default
+        netease.value = "http://10.0.2.2:3300";
+      }
+    })();
+  </script>
+</body>
+</html>

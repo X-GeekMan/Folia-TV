@@ -3,14 +3,16 @@ package top.izuna.foliatv
 import android.webkit.JavascriptInterface
 
 /**
- * Native ↔ Web bridge. Keep method names stable; the injected TV runtime
- * calls into Android via `FoliaNative.*` and receives keys via
- * `window.FoliaTV.dispatchKey(...)`.
+ * Native ↔ Web bridge.
  */
 class FoliaJsBridge(
     private val onReady: () -> Unit,
     private val onExitRequest: () -> Unit,
     private val onLog: (String) -> Unit,
+    private val getApiConfigJson: () -> String,
+    private val saveApiConfigJson: (String) -> Unit,
+    private val openBundledApp: () -> Unit,
+    private val openSettings: () -> Unit,
 ) {
     @JavascriptInterface
     fun ready() {
@@ -25,5 +27,23 @@ class FoliaJsBridge(
     @JavascriptInterface
     fun log(message: String) {
         onLog(message)
+    }
+
+    @JavascriptInterface
+    fun getApiConfig(): String = getApiConfigJson()
+
+    @JavascriptInterface
+    fun saveApiConfig(json: String) {
+        saveApiConfigJson(json)
+    }
+
+    @JavascriptInterface
+    fun openApp() {
+        openBundledApp()
+    }
+
+    @JavascriptInterface
+    fun openApiSettings() {
+        openSettings()
     }
 }

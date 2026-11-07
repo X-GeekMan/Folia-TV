@@ -1,12 +1,15 @@
-.gradle/
-build/
-app/build/
-local.properties
-*.iml
-.idea/
-dist/
-keystore/
+# Folia TV Android shell
+android-tv/.gradle/
+android-tv/build/
+android-tv/app/build/
+android-tv/app/src/main/assets/www/
+android-tv/local.properties
+android-tv/*.iml
+android-tv/.idea/
+android-tv/keystore/
+android-tv/dist/
 *.apk
 *.aab
-*.jks
-*.keystore
+web/
+vendor/
+folia-major.zip

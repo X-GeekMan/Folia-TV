@@ -1,6 +1,6 @@
 # Folia-TV
 
-Android TV 上的 Folia 客户端：用 WebView 加载 Folia Web，适配遥控器（D-pad）。
+Android TV 上的 Folia 客户端：内置 Folia 界面 + WebView 壳，适配遥控器（D-pad）。只需配置音源 API。
 
 **APK 下载：** [Releases · v0.1.0](https://github.com/X-GeekMan/Folia-TV/releases/tag/v0.1.0)  
 直链：[`Folia-TV-0.1.0.apk`](https://github.com/X-GeekMan/Folia-TV/releases/download/v0.1.0/Folia-TV-0.1.0.apk)
@@ -9,20 +9,21 @@ Android TV 上的 Folia 客户端：用 WebView 加载 Folia Web，适配遥控�
 
 Folia-TV 是面向 Android TV / 机顶盒的播放端：
 
-- 功能与 Folia Web 保持一致（登录、搜歌、歌单、歌词舞台等）
+- **内置前端**（与 Folia Web 同源），不再填写部署 URL
+- 首次启动只配置网易云 / QQ / 酷狗等 **API 地址**
 - 使用 **WebView 壳**打包 APK（不是 TWA）
 - **遥控器**：方向键焦点、确认、返回、播放/上下曲
-- TV 只做客户端；网易云 / QQ / 酷狗等音源 API 仍需自行部署
+- TV 只做客户端；音源 API 仍需在电脑 / NAS 上自建（与电脑版共用）
 
 包名：`top.izuna.foliatv`
 
 ## 目录
 
 ```
-android-tv/          Android TV 工程（Leanback + 按键桥）
+android-tv/          Android TV 工程（Leanback + 按键桥 + 内置 www）
 tv-overlay/          Web 侧 TV 适配入口
-scripts/             辅助脚本
-.github/workflows/   打 tag 自动构建 APK
+scripts/             构建 / 推送脚本
+.github/workflows/   打 tag 自动构建 APK（含 web 打包）
 ```
 
 ## 安装
@@ -31,27 +32,25 @@ scripts/             辅助脚本
 adb install -r Folia-TV-0.1.0.apk
 ```
 
-首次启动填写已部署的 Folia Web 地址：
+首次启动填写 API：
 
-| 场景 | URL 示例 |
+| 场景 | 网易云 API 示例 |
 | --- | --- |
-| 真机 + 电脑局域网 | `http://192.168.x.x:3000` |
-| Android 模拟器访问宿主 | `http://10.0.2.2:3000` |
-| 已部署的 Web | `https://your-folia.example.com` |
+| Android 模拟器访问宿主 | `http://10.0.2.2:3300` |
+| 真机 + 电脑局域网 | `http://192.168.x.x:3300` |
 
-也可用 Intent 指定：
-
-```bash
-adb shell am start -n top.izuna.foliatv/.MainActivity --es start_url "http://10.0.2.2:3000"
-```
-
-## 本地构建 APK
+## 本地构建
 
 ```bash
+# 1) 准备 Folia 源码
+git clone --depth 1 https://github.com/chthollyphile/folia-major.git web
+
+# 2) 用哨兵 API 地址打包前端 → android-tv/.../assets/www
+node scripts/build-web-for-tv.mjs
+
+# 3) 打 APK
 cd android-tv
 ./gradlew :app:assembleRelease
-# 或调试包
-./gradlew :app:assembleDebug
 ```
 
 产物：
@@ -65,7 +64,7 @@ cd android-tv
 | --- | --- |
 | 方向键 | 空间焦点移动 |
 | 确认 / OK | 激活当前焦点 |
-| 返回 | 关弹层 → 历史返回 / 退出 |
+| 返回 | 关弹层 → 设置页 / 退出 |
 | 播放暂停 | 播放控制 |
 | 上一首 / 下一首 | 切歌 |
 | 菜单 | 尝试打开命令面板 |
@@ -79,7 +78,7 @@ git tag v0.1.1
 git push origin v0.1.1
 ```
 
-GitHub Actions 会构建 APK 并挂到对应 Release。
+GitHub Actions 会拉取 `folia-major`、打包内置前端并挂 APK 到对应 Release。
 
 ## 许可
 

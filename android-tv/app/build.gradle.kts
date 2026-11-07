@@ -13,11 +13,11 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
-        // First-run bootstrap page (set Folia Web URL). Override via Intent extra `start_url`.
+        // First-run API settings. Bundled Folia UI loads from assets/www after config.
         buildConfigField(
             "String",
             "DEFAULT_START_URL",
-            "\"file:///android_asset/bootstrap.html\""
+            "\"file:///android_asset/settings.html\""
         )
     }
 
